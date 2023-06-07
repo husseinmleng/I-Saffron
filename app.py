@@ -1,6 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from utils import get_result,img_to_base64,get_img_array
 import io
+import traceback
 from PIL import Image
 from flask_cors import CORS
 import os
@@ -8,12 +9,16 @@ import os
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/')
+def home():
+    return "Hello World"
+
 @app.route('/index')
 def index():
     return app.send_static_file('index.html')
 
 # Define route to accept image file
-@app.route('/predict', methods=['GET','POST'])
+@app.route('/predict', methods=['POST'])
 def predict():
     try:
         # Get uploaded image file
@@ -41,10 +46,12 @@ def predict():
                     'gradcam_image':  img_to_base64(sup_img),
                     'input_image': img_to_base64(get_img_array(img)),
                    }
+        # render the json response in the index.html
+        return jsonify(response)
 
-        return jsonify(response), 200
     except Exception as e:
         print(f"Error predicting image: {e}")
+        traceback.print_exc()
         response = {'error': 'Unable to process image'}
         return jsonify(response), 500
 

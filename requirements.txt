@@ -1,0 +1,10 @@
+keras
+tensorflow
+pillow
+numpy
+matplotlib
+whatimage
+pyheif
+Flask
+flask-cors
+gunicorn

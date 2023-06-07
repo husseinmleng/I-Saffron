@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SaffroSystems</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        font-family: cursive;
+      }
+
+      .container {
+        text-align: center;
+      }
+
+      .d {
+        color: white;
+        display: fill;
+        border-radius: 30px;
+        font-size: 200%;
+        font-family: cursive;
+        letter-spacing: 2px;
+        background-color: pink;
+        color: Purple;
+        font-family: cursive;
+        text-align: center;
+      }
+
+      @media screen and (max-width: 600px) {
+        .d {
+          font-size: 150%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="d">I-Eye Saffron</h1>
+      <form id="upload-form" action="/predict" method="POST" enctype="multipart/form-data">
+        <label for="image">Select an image:</label>
+        <input type="file" id="image" name="image"><br><br>
+        <input type="submit" value="Classify">
+      </form>
+      <div id="result">
+        <h2 class="d">Result</h2>
+        <img id="input-image" src="#" alt="Input Image" width="200">
+        <img id="output-image" src="#" alt="Output Image" width="200">
+        <p id="predicted-class"></p>
+        <p id="saffron-probability"></p>
+        <p id="non-saffron-probability"></p>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

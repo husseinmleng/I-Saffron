@@ -127,10 +127,6 @@ def get_result(image: Image.Image,alpha=0.4):
     return result, sup_img
 
 @app.route('/')
-def home():
-    return "Hello World"
-
-@app.route('/index')
 def index():
     return app.send_static_file('index.html')
 

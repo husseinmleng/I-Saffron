@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SaffroSystems - Classification Result</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        font-family: 'Open Sans', sans-serif;
+      }
+
+      .container {
+        text-align: center;
+      }
+
+      .d {
+        color: white;
+        display: fill;
+        border-radius: 30px;
+        font-size: 200%;
+        font-family: 'Open Sans', sans-serif;
+        letter-spacing: 2px;
+        background-color: #644f7f;
+        color: white;
+        text-align: center;
+      }
+
+      @media screen and (max-width: 600px) {
+        .d {
+          font-size: 150%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="d">Classification Result</h1>
+      <div id="result">
+        <img id="input-image" src="data:image/jpeg;base64,{{ response.input_image }}" alt="Input Image" width="200">
+        <img id="output-image" src="data:image/jpeg;base64,{{ response.gradcam_image }}" alt="Output Image" width="200">
+        <p id="predicted-class">Predicted Class: {{ response.predicted_class }}</p>
+        <p id="saffron-probability">Saffron Probability: {{ response.saffron_probability }}%</p>
+        <p id="non-saffron-probability">Non-Saffron Probability: {{ response.non_saffron_probability }}%</p>
+      </div>
+      <a href="/">Classify Another Image</a>
+    </div>
+  </body>
+</html>

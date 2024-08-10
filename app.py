@@ -1,28 +1,22 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import io
-import traceback
 from PIL import Image
 from flask_cors import CORS
-import os
 from tensorflow.keras.models import load_model
-import io
 import tensorflow as tf
-from PIL import Image
 import numpy as np
 from tensorflow.keras.utils import img_to_array
 from tensorflow.keras.utils import array_to_img
 import whatimage
 import pyheif
-import tensorflow as tf
 import matplotlib.cm as cm
-from PIL import Image
-import io
+
 import base64
-# Create Flask app  
+
+# Create Flask app
 app = Flask(__name__)
 CORS(app)
 model = load_model('func_model_2.h5')
-
 
 def decode_image(bytesIo):
     try:
@@ -36,7 +30,7 @@ def decode_image(bytesIo):
     except Exception as e:
         print(f"Error decoding image: {e}")
         return None
-    
+
 def img_to_base64(img_array):
     img_pil = Image.fromarray(np.uint8(img_array))
     buffer = io.BytesIO()
@@ -63,7 +57,7 @@ def make_gradcam_heatmap(img_array, model, last_conv_layer_name, pred_index=None
 ###
 ###
     # Then, we compute the gradient of the top predicted class for our input image
-    # with respect to the activations of the last conv layer 
+    # with respect to the activations of the last conv layer
     with tf.GradientTape() as tape:
         last_conv_layer_output, preds = grad_model(img_array)
         if pred_index is None:
@@ -115,7 +109,7 @@ def get_result(image: Image.Image,alpha=0.4):
     img = decode_image(image)
     orignal_image = img_to_array(img.resize(size=(224,224)))
     img = np.expand_dims(orignal_image, axis = 0)
-    img = img / 127.5 - 1.0    
+    img = img / 127.5 - 1.0
     result = model.predict(img)
     # Remove last layer's softmax
     vis_model = model
@@ -126,47 +120,34 @@ def get_result(image: Image.Image,alpha=0.4):
     sup_img = get_gradcam(orignal_image,heatmap)
     return result, sup_img
 
-@app.route('/')
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    return app.send_static_file('index.html')
-
-# Define route to accept image file
-@app.route('/predict', methods=['POST'])
-def predict():
-    try:
-        # Get uploaded image file
+    if request.method == 'POST':
         _file = request.files['image']
-        # Load image and preprocess
         img = _file.read()
-        if img is None:
-            response = {'error': 'Unable to decode image'}
-            return jsonify(response), 400
-        
-        # Make prediction and generate GradCAM heatmap
-        result,sup_img = get_result(img)
+        if not img:
+            return jsonify({'error': 'No image uploaded'}), 400
 
-        # Return response as JSON
+        result, sup_img = get_result(img)
+
         label = 'Saffron' if result[0][0] > 0.5 else 'Non-Saffron'
-        saffron_prob = round(result[0][0]*100, 2)
-        non_saffron_prob = round(100-saffron_prob,2)
-        # convert image to pil image
-        img = Image.open(io.BytesIO(img))
-      
-        response = {
-                    'predicted_class': label,
-                    'saffron_probability': saffron_prob,
-                    'non_saffron_probability': non_saffron_prob,
-                    'gradcam_image':  img_to_base64(sup_img),
-                    'input_image': img_to_base64(get_img_array(img)),
-                   }
-        # render the json response in the index.html
-        return jsonify(response)
+        saffron_prob = round(result[0][0] * 100, 2)
+        non_saffron_prob = round(100 - saffron_prob, 2)
 
-    except Exception as e:
-        print(f"Error predicting image: {e}")
-        traceback.print_exc()
-        response = {'error': 'Unable to process image'}
-        return jsonify(response), 500
+        response = {
+            'predicted_class': label,
+            'saffron_probability': saffron_prob,
+            'non_saffron_probability': non_saffron_prob,
+            'gradcam_image': img_to_base64(sup_img),
+            'input_image': img_to_base64(get_img_array(decode_image(img))),
+        }
+
+        return render_template('display.html', response=response)
+
+    return render_template('index.html')
+
+
 
 if __name__ == '__main__':
-    app.run(port=int(os.environ.get("PORT", 5050)), debug=False)
+    app.run()
